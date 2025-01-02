@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Websockets Chat</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Chat Application</h1>
+    </header>
+    <main id="individualMessaging">
+      <section class="form-section">
+        <h2>Send a Message</h2>
+        <input type="text" id="usernameInput" placeholder="Your Name" />
+        <input type="text" id="messageInput" placeholder="Your Message" />
+        <button id="sendMessageBtn">Send</button>
+      </section>
+      <section class="messages-section">
+        <h2>Messages</h2>
+        <div class="messages-list">
+          <ul id="messages"></ul>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p>&copy; 2025 Chat App</p>
+    </footer>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const sendMessageBtn = document.getElementById("sendMessageBtn");
+      const usernameInput = document.getElementById("usernameInput");
+      const messageInput = document.getElementById("messageInput");
+      const messagesList = document.getElementById("messages");
+
+      sendMessageBtn.addEventListener("click", () => {
+        const messageText = messageInput.value;
+        const username = usernameInput.value;
+
+        const senderDiv = document.createElement("div");
+        senderDiv.setAttribute("class", "message-sender");
+
+        const messageItem = document.createElement("li");
+        messageItem.innerText = username;
+        const messageContent = document.createElement("p");
+        messageContent.innerText = messageText;
+
+        senderDiv.appendChild(messageItem);
+        senderDiv.appendChild(messageContent);
+        messagesList.append(senderDiv);
+
+        socket.emit("send_message", { username, messageText });
+      });
+
+      socket.on("message", (data) => {
+        console.log(data);
+      });
+
+      socket.on("broadcast", (data) => {
+        const receiverDiv = document.createElement("div");
+        receiverDiv.setAttribute("class", "message-receiver");
+
+        const messageItem = document.createElement("li");
+        messageItem.innerText = data.username;
+
+        const messageContent = document.createElement("p");
+        messageContent.innerText = data.messageText;
+
+        receiverDiv.appendChild(messageItem);
+        receiverDiv.appendChild(messageContent);
+        messagesList.appendChild(receiverDiv);
+      });
+    </script>
+  </body>
+</html>
